@@ -1,0 +1,61 @@
+---
+- name: "Flask App"
+  hosts: amazon
+  become: true
+  vars:
+    packages:
+      - git
+      - python3
+      - pip
+    user: "ec2-user"
+    group: "ec2-user"
+    working_directory: "/home/ec2-user/assignment"
+    repo_url: "https://github.com/Prince-Philip-Kadavil/Flask_app_Unit_file.git"
+
+  tasks:
+
+    - name: "Installing required packages"
+      yum:
+        name: "{{ packages }}"
+        state: present
+
+    - name: "Installing Flask"
+      pip:
+        name: flask
+        state: present
+
+    - name: "Cloning Flask app and unit file from GIT Repo "
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ working_directory }}"
+
+    - name: "Copying files"
+      copy:
+        src: "{{ working_directory }}/app.service"
+        dest:  "/etc/systemd/system/app.service"
+        remote_src: true
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Replace user and group in service file
+      replace:
+        path: "/etc/systemd/system/app.service"
+        regexp: 'User=ec2-user'
+        replace: "User={{ user }}"
+
+    - name: Replace user and group in service file
+      replace:
+        path: "/etc/systemd/system/app.service"
+        regexp: 'Group=ec2-user'
+        replace: "Group={{ group }}"
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Ensure service is enabled and running
+      systemd:
+        name: app
+        enabled: yes
+        state: started
