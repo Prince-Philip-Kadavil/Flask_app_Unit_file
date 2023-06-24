@@ -1,4 +1,4 @@
-# Flask_app_Unit_file
+# Deploying a Flask App on EC2 with systemd
 
 The Ansible project is a simple Flask application that is deployed on an Amazon EC2 instance. The project uses the following Ansible tasks:
 
